@@ -1,12 +1,8 @@
 import Link from "next/link";
 
-const Mark = () => (
-  <svg width="26" height="26" viewBox="0 0 32 32" fill="none" aria-hidden>
-    <path d="M23.5 10.2A9 9 0 1 0 25 17" stroke="#ff5b1f" strokeWidth="3" strokeLinecap="round" />
-    <circle cx="23" cy="8.5" r="2.6" fill="#ff5b1f" />
-  </svg>
+const Logo = () => (
+  <span className="logo"><img src="/azad-mark.svg" width="26" height="26" alt="" />Azad</span>
 );
-const Logo = () => (<span className="logo"><Mark />Azad</span>);
 
 /* Deterministic field of launches: most are filtered out at the scan line. */
 function Funnel() {
@@ -113,6 +109,27 @@ export default function Landing() {
       <section id="faq"><div className="wrap" style={{ maxWidth: 760 }}>
         <h2>Questions</h2>
         <div style={{ marginTop: 28 }}>{faqs.map(([q, a]) => (<details className="q" key={q}><summary>{q}</summary><p>{a}</p></details>))}</div>
+      </div></section>
+
+      <section id="community" className="community"><div className="wrap">
+        <div className="two">
+          <div>
+            <h2>Contact & community</h2>
+            <p className="lead">Follow Azad and get in touch.</p>
+            <div className="community-links">
+              <a className="btn" href="https://x.com/Azadai_xyz" target="_blank" rel="noreferrer">Follow us on X <span aria-hidden="true">↗</span></a>
+              <a className="btn" href="https://github.com/azad-ai" target="_blank" rel="noreferrer">GitHub <span aria-hidden="true">↗</span></a>
+            </div>
+          </div>
+          <div className="backers">
+            <h3>Backers</h3>
+            <ul>
+              <li>SolanaFDN</li>
+              <li>anza_xyz</li>
+              <li>Dynamo Ventures</li>
+            </ul>
+          </div>
+        </div>
       </div></section>
 
       <section className="end"><div className="wrap">

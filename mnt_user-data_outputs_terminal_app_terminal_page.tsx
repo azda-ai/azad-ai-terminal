@@ -91,7 +91,7 @@ export default function Terminal() {
   return (
     <main className="term">
       <div className="tbar"><Link href="/" className="logo" aria-label="Azad home">
-        <svg width="24" height="24" viewBox="0 0 32 32" fill="none" aria-hidden><path d="M23.5 10.2A9 9 0 1 0 25 17" stroke="#ff5b1f" strokeWidth="3" strokeLinecap="round" /><circle cx="23" cy="8.5" r="2.6" fill="#ff5b1f" /></svg>Azad</Link></div>
+        <img src="/azad-mark.svg" width="24" height="24" alt="" />Azad</Link></div>
       <div className="tabs" role="tablist">
         {["Chat", "Battle Arena", "Token"].map((t) => <button key={t} role="tab" aria-selected={tab === t} onClick={() => setTab(t)}>{t}</button>)}
       </div>
