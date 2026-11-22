@@ -3,6 +3,7 @@
 
 # Next.js
 /.next/
+/.open-next/
 /out/
 /build/
 
@@ -11,6 +12,7 @@
 
 # Local deployment configuration
 /.vercel/
+/.wrangler/
 
 # Environment variables and secrets
 .env
