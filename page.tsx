@@ -124,9 +124,9 @@ export default function Landing() {
           <div className="backers">
             <h3>Backers</h3>
             <ul>
-              <li>SolanaFDN</li>
-              <li>anza_xyz</li>
-              <li>Dynamo Ventures</li>
+              <li>Redacted</li>
+              <li>Redacted</li>
+              <li>Redacted</li>
             </ul>
           </div>
         </div>

@@ -131,11 +131,35 @@ function event(data: unknown) {
   return `data: ${JSON.stringify(data)}\n\n`;
 }
 
+function azadServiceMessage(status: number) {
+  if (status === 408 || status === 504) {
+    return "Azad took too long to prepare a response. Please try again.";
+  }
+
+  if (status === 400 || status === 404) {
+    return "The Gemini model or request configuration was rejected. Check GEMINI_MODEL and try again.";
+  }
+
+  if (status === 401 || status === 403) {
+    return "The Gemini API key was rejected or does not have access to this model. Check the key and project permissions.";
+  }
+
+  if (status === 429) {
+    return "Azad is experiencing high demand. Please try again shortly.";
+  }
+
+  if (status === 503) {
+    return "Gemini is temporarily unavailable. Please try again shortly.";
+  }
+
+  return "Azad is temporarily unavailable. Please try again shortly.";
+}
+
 export async function POST(request: Request) {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     return NextResponse.json(
-      { error: "AI chat needs a free Gemini API key. Add GEMINI_API_KEY to .env.local, then restart the dev server." },
+      { error: "Azad is temporarily unavailable because the chat service is not configured." },
       { status: 503 },
     );
   }
@@ -200,20 +224,18 @@ export async function POST(request: Request) {
         system_instruction: "You are Azad, a helpful assistant for Solana memecoin research. Be concise and explain risks clearly. When live Solana or market data is included in the user input, use it accurately and identify that it is a point-in-time reading. Without supplied live data, never claim to have checked a token or current market conditions. Do not present guesses as facts. Do not provide personalized financial advice or claim a token is safe. Largest token accounts are not the same as unique holders. The app does not execute trades through chat.",
         input,
       }),
-      signal: request.signal,
+      signal: AbortSignal.timeout(30_000),
     });
   } catch {
-    return NextResponse.json({ error: "Could not reach the AI provider. Check the server connection and try again." }, { status: 502 });
+    return NextResponse.json({ error: "Azad could not reach the chat service. Please try again shortly." }, { status: 503 });
   }
 
   if (!upstream.ok || !upstream.body) {
-    const details = await upstream.json().catch(() => null) as { error?: { message?: string } } | null;
-    const message = upstream.status === 401
-      ? "The Gemini API key was rejected. Check GEMINI_API_KEY in .env.local."
-      : upstream.status === 429
-        ? "The Gemini API free-tier limit was reached. Wait for the quota to reset or check your Google AI Studio usage."
-        : details?.error?.message || `The AI provider returned HTTP ${upstream.status}.`;
-    return NextResponse.json({ error: message }, { status: upstream.status === 401 ? 503 : 502 });
+    console.error("Gemini chat request failed", { status: upstream.status });
+    return NextResponse.json(
+      { error: azadServiceMessage(upstream.status) },
+      { status: upstream.status === 429 ? 429 : 503 },
+    );
   }
 
   const reader = upstream.body.getReader();
@@ -250,7 +272,7 @@ export async function POST(request: Request) {
         controller.enqueue(encoder.encode(event({ type: "done" })));
         controller.close();
       } catch {
-        controller.enqueue(encoder.encode(event({ type: "error", error: "The AI response stream was interrupted. Try again." })));
+        controller.enqueue(encoder.encode(event({ type: "error", error: "Azad's response was interrupted. Please try again." })));
         controller.close();
       } finally {
         reader.releaseLock();

@@ -12,6 +12,7 @@ type SolanaWallet = {
 const fmt = (n?: number | null) => (n == null ? "n/a" : n >= 1e6 ? (n / 1e6).toFixed(2) + "M" : n >= 1e3 ? (n / 1e3).toFixed(1) + "K" : String(Math.round(n)));
 const LABEL: Record<string, string> = { fetch_new_pools: "Scanning new pairs", fetch_token_safety: "Checking mint and holders", fetch_smart_money: "Reading tracked wallets", fetch_social_sentiment: "Reading X", show_token_card: "Building card", execute_swap: "Requesting quote" };
 const TRY = ["New launches in the last 2 hours with liquidity over $20K", "Check the safety of this mint: paste an address", "Which fresh tokens have a revoked mint and freeze authority?"];
+const MAINTENANCE_MESSAGE = "Azad AI is currently under maintenance by the Software team, kindly check back by 00:00am 25th Nov";
 
 function TokenCard({ c }: { c: Card }) {
   const [sol, setSol] = useState("0.1"), [slip, setSlip] = useState("5"), [st, setSt] = useState("");
@@ -65,10 +66,7 @@ export default function Terminal() {
     try {
       const res = await fetch("/api/chat", { method: "POST", headers: { "content-type": "application/json" },
         body: JSON.stringify({ messages: next.slice(0, -1).map((m) => ({ role: m.role, content: m.text })) }) });
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({})) as { error?: string };
-        throw new Error(body.error || `Chat request failed (${res.status}).`);
-      }
+      if (!res.ok) throw new Error(MAINTENANCE_MESSAGE);
       if (!res.body) throw new Error("Chat response had no stream.");
       const rd = res.body.getReader(), dec = new TextDecoder(); let buf = "";
       for (;;) {
@@ -80,11 +78,11 @@ export default function Terminal() {
           if (e.type === "text") upd((m) => ({ ...m, text: m.text + e.text, status: "" }));
           else if (e.type === "tool") upd((m) => ({ ...m, status: (LABEL[e.name] || "Working") + "..." }));
           else if (e.type === "card") upd((m) => ({ ...m, cards: [...(m.cards || []), e.card] }));
-          else if (e.type === "error") upd((m) => ({ ...m, text: m.text + `\nSomething went wrong: ${e.error}` }));
+          else if (e.type === "error") upd((m) => ({ ...m, text: MAINTENANCE_MESSAGE }));
           end.current?.scrollIntoView({ block: "end" });
         }
       }
-    } catch (e: unknown) { upd((m) => ({ ...m, text: e instanceof Error ? e.message : "Connection lost. Try again." })); }
+    } catch { upd((m) => ({ ...m, text: MAINTENANCE_MESSAGE })); }
     setBusy(false); upd((m) => ({ ...m, status: "" }));
   }
 
